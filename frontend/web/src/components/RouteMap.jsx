@@ -6,7 +6,8 @@ import {
   getCampIcon,
   getParkIcon,
   getSnowIcon,
-  getShopIcon
+  getShopIcon,
+  getMonumentIcon
 } from "./icons";
 
 import "../styles/map-icons.css";
@@ -67,6 +68,8 @@ export default function RouteMap({ points, routes }) {
               ? getCampIcon(p.status)
               : p.type === "shop"
               ? getShopIcon(p.status)
+              : p.type === "monument"
+              ? getMonumentIcon(p.status)
               : getCampIcon(p.status)
           }
         >

@@ -19,6 +19,12 @@ import campRed from "../assets/icons/fire-red.png";
 import shopDefault from "../assets/icons/shop-white.png";
 import shopGreen from "../assets/icons/shop-green.png";
 import shopRed from "../assets/icons/shop-red.png";
+
+//monument icons
+import monumentDefault from "../assets/icons/monument-white.png"
+import monumentGreen from "../assets/icons/monument-green.png"
+import monumentRed from "../assets/icons/monument-red.png"
+
 export function getParkIcon(status) {
   let iconUrl =
     status === "visited" ? parkGreen :
@@ -63,6 +69,19 @@ export function getShopIcon(status) {
     status === "visited" ? shopGreen :
     status === "skipped" ? shopRed :
     shopDefault;
+
+  return new L.Icon({
+    iconUrl,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32]
+  });
+}
+
+export function getMonumentIcon(status) {
+  let iconUrl =
+    status === "visited" ? monumentGreen :
+    status === "skipped" ? monumentRed :
+    monumentDefault;
 
   return new L.Icon({
     iconUrl,

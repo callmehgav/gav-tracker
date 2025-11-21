@@ -17,11 +17,12 @@
 
   z-index: 9999;
 }
-
-.stats-logo {
-  height: 50px;
-  width: auto;
+.stats-logo img {
+  width: 42px;
+  height: auto;
+  margin-right: 24px;
   opacity: 0.9;
+  transform: scale(1.6);
 }
 
 .stats-group {

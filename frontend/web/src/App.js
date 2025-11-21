@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import RouteMap from "./components/RouteMap";
 import StatsBar from "./components/StatsBar";
-import logo from "./assets/logos/logoNoWords.png";
 
 import { buildRoutesFromPoints } from "./utils/routeBuilder";
 import { computeStats } from "./utils/stats";
@@ -69,26 +68,6 @@ function App() {
       {/* Stats Bar */}
       {stats && <StatsBar {...stats} />}
 
-      {/* Logo */}
-      <div style={{
-        position: "absolute",
-        top: "20px",
-        left: "20px",
-        zIndex: 1000,
-        backgroundColor: "rgba(0,0,0,0.6)",
-        padding: "10px 14px",
-        borderRadius: "12px",
-        backdropFilter: "blur(6px)"
-      }}>
-        <img
-          src={logo}
-          alt="Gav Tracker Logo"
-          style={{
-            width: "40px",
-            transform: "scale(1.8)"
-          }}
-        />
-      </div>
 
       {/* Map */}
       <RouteMap points={trip.points} routes={routes} />

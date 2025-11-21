@@ -1,4 +1,5 @@
 import "../styles/StatsBar.css";
+import logo from "../assets/logos/logoNoWords.png";
 
 export default function StatsBar({
   totalMiles,
@@ -6,15 +7,20 @@ export default function StatsBar({
   milesLeft,
   dieselCostTotal,
   dieselCostSpent,
-  dieselCostLeft,
+  maintananceCost,
   parksVisited,
   snowVisited,
   daysSinceStart
 }) {
   return (
     <div className="stats-bar">
-      <div className="stats-section logo"> 
-        <img src="/assets/logos/logoNoWords.png" alt="Gav's Nexus" className="stats-logo"/>
+
+      {/* Logo inside the bar */}
+      <div className="stats-logo">
+        <img
+          src={logo}
+          alt="Gav Tracker Logo"
+        />
       </div>
 
       <div className="stats-group">
@@ -22,10 +28,10 @@ export default function StatsBar({
           <strong>Total Miles:</strong> {Math.round(totalMiles)}
         </div>
         <div className="stat-item">
-          <strong>Completed:</strong> {Math.round(milesDone)}
+          <strong>Completed Miles:</strong> {Math.round(milesDone)}
         </div>
         <div className="stat-item">
-          <strong>Remaining:</strong> {Math.round(milesLeft)}
+          <strong>Remaining Miles:</strong> {Math.round(milesLeft)}
         </div>
       </div>
 
@@ -37,7 +43,7 @@ export default function StatsBar({
           <strong>Diesel Spent:</strong> ${dieselCostSpent}
         </div>
         <div className="stat-item">
-          <strong>Remaining Fuel:</strong> ${dieselCostLeft}
+          <strong>Est. Maintanance Spent:</strong> ${maintananceCost}
         </div>
       </div>
 
