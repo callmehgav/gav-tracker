@@ -1,0 +1,41 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start PHP Server",
+      "type": "shell",
+      "command": "php",
+      "args": [
+        "-S",
+        "localhost:8000",
+        "-t",
+        "${workspaceFolder}/backend/public"
+      ],
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "Start React App",
+      "type": "shell",
+      "command": "npm",
+      "args": ["start"],
+      "options": {
+        "cwd": "${workspaceFolder}/frontend/web"
+      },
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "Start Full Dev Environment",
+      "dependsOn": [
+        "Start PHP Server",
+        "Start React App"
+      ],
+      "dependsOrder": "parallel",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
