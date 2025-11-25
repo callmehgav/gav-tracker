@@ -1,6 +1,5 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json");
+require_once __DIR__ . '/cors.php';
 
 // Require start and end params
 if (!isset($_GET["start"]) || !isset($_GET["end"])) {

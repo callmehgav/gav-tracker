@@ -2,7 +2,7 @@ import polyline from "@mapbox/polyline";
 
 export async function getOSRMRoute(start, end) {
   const url = `http://localhost:8000/osrm-route.php?start=${start}&end=${end}`;
-    console.log("Requesting OSRM:", url);
+    //console.log("Requesting OSRM:", url);
 
   try {
     const res = await fetch(url);
@@ -12,7 +12,7 @@ export async function getOSRMRoute(start, end) {
       console.error("OSRM invalid response:", data);
       return null;
     }
-        console.log("OSRM response:", data);
+        //console.log("OSRM response:", data);
 
     // Decode the polyline
     const decoded = polyline.decode(data.geometry);

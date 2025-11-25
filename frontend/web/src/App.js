@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import RouteMap from "./components/RouteMap";
-import StatsBar from "./components/StatsBar";
+import StatsBar from "./components/StatBar";
 
 import { buildRoutesFromPoints } from "./utils/routeBuilder";
 import { computeStats } from "./utils/stats";
@@ -10,6 +10,10 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [routes, setRoutes] = useState([]);
   const [stats, setStats] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  function handleLoginStatusChange(status) {
+    setIsLoggedIn(status);
+  }
 
   // --------------------------------------------------
   // LOAD TRIP DATA FROM PHP
@@ -66,9 +70,11 @@ function App() {
     <div style={{ height: "100vh", width: "100vw", position: "relative" }}>
       
       {/* Stats Bar */}
-      {stats && <StatsBar {...stats} />}
-
-
+      
+      <StatsBar 
+        {...stats} 
+        onLoginStatusChange={handleLoginStatusChange}
+      />
       {/* Map */}
       <RouteMap points={trip.points} routes={routes} />
     </div>

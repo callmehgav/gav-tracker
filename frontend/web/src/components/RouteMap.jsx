@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Polyline, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -20,7 +21,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-export default function RouteMap({ points, routes }) {
+export default function RouteMap({ points, routes, loggedIn }) {
 
   const latLngs = points.map(p => [p.lat, p.lng]);
 
@@ -39,12 +40,13 @@ export default function RouteMap({ points, routes }) {
         filter: "drop-shadow(0px 0px 8px #00aaff88)"
       }}
     >
+      {/* Dark Map Layer */}
       <TileLayer
         url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png"
-        attribution="© Stadia Maps, © OpenMapTiles, © OpenStreetMap contributors"
+        attribution=" Gav's nexus X  © OpenMapTiles, © OpenStreetMap"
       />
 
-      {/* Draw OSRM road routes */}
+      {/* Draw OSRM Road Routes */}
       {routes && routes.map(route => (
         <Polyline
           key={route.key}
@@ -54,7 +56,7 @@ export default function RouteMap({ points, routes }) {
         />
       ))}
 
-      {/* Draw markers */}
+      {/* Draw Markers */}
       {points.map((p, index) => (
         <Marker
           key={index}
@@ -73,7 +75,43 @@ export default function RouteMap({ points, routes }) {
               : getCampIcon(p.status)
           }
         >
-          <Popup>{p.name}</Popup>
+          <Popup>
+            <strong>{p.name}</strong>
+
+            {/* ADMIN EDIT CONTROLS - hidden unless logged in */}
+            {loggedIn && (
+              <div style={{ marginTop: "10px" }}>
+                <div>
+                  <label>Status: </label>
+                  <select defaultValue={p.status}>
+                    <option value="planned">Planned</option>
+                    <option value="visited">Visited</option>
+                    <option value="skipped">Skipped</option>
+                  </select>
+                </div>
+
+                <div style={{ marginTop: "6px" }}>
+                  <label>Notes:</label>
+                  <textarea
+                    defaultValue={p.notes || ""}
+                    style={{ width: "100%", height: "60px" }}
+                  />
+                </div>
+
+                <button style={{
+                  marginTop: "8px",
+                  width: "100%",
+                  padding: "6px",
+                  background: "#0077ff",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "5px"
+                }}>
+                  Save
+                </button>
+              </div>
+            )}
+          </Popup>
         </Marker>
       ))}
     </MapContainer>
