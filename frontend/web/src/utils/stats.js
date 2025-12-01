@@ -8,7 +8,7 @@ export function computeStats(routes, points) {
 
   const dieselCostTotal = ((totalMiles / MPG) * DIESEL).toFixed(2);
   const dieselCostSpent = ((milesDone / MPG) * DIESEL).toFixed(2);
-  const maintananceCost = 5500;
+
 
   const parksVisited = points.filter(
     p => p.type === "national_park" && p.status === "visited"
@@ -31,7 +31,6 @@ export function computeStats(routes, points) {
     milesLeft,
     dieselCostTotal,
     dieselCostSpent,
-    maintananceCost,
     parksVisited,
     snowVisited,
     daysSinceStart

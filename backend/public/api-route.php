@@ -1,6 +1,22 @@
 <?php
 require_once __DIR__ . '/cors.php';
 
+$stopsFile = __DIR__ . '/../data/stops.json';
+
+$stops = file_exists($stopsFile)
+    ? json_decode(file_get_contents($stopsFile), true)
+    : [];
+
+$response = [
+    "name" => "Gav West Coast Master Route",
+    "points" => $stops
+];
+
+echo json_encode($response);
+
+
+/*
+untouched default list
 $stops = [
     ["name" => "Anniston Alabama", "lat" => 33.6598, "lng" => -85.8316, "type" => "start", "status" => "visited"],
     ["name" => "Strokin Diesel", "lat" => 33.9749, "lng" => -86.4481, "type" => "shop", "status" => "visited"],
@@ -84,10 +100,4 @@ $stops = [
     ["name" => "Badlands National Park", "lat" => 43.8554, "lng" => -102.3397, "type" => "national_park", "status" => "skipped"],
     ["name" => "Sidney Ohio", "lat" => 40.2842, "lng" => -84.1555, "type" => "end", "status" => "skipped"]
 ];
-
-$response = [
-    "name" => "Gav West Coast Master Route",
-    "points" => $stops
-];
-
-echo json_encode($response);
+*/

@@ -12,6 +12,13 @@
     animation: App-logo-spin infinite 20s linear;
   }
 }
+.app-wrapper {
+  width: 100vw;
+  height: 100vh; /* full screen */
+  overflow: hidden; /* important so map isn't pushing layout */
+  position: relative;
+}
+
 
 .App-header {
   background-color: #282c34;
@@ -35,4 +42,30 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+
+/* FORCE TOAST TO THE ABSOLUTE TOP */
+.global-toast {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 16px;
+
+  z-index: 999999999999999999 !important;
+  pointer-events: none;
+}
+
+
+
+@keyframes fadeInOut {
+  0%   { opacity: 0; transform: translateY(10px); }
+  10%  { opacity: 1; transform: translateY(0); }
+  90%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(10px); }
 }

@@ -15,6 +15,11 @@ import campDefault from "../assets/icons/fire-white.png";
 import campGreen from "../assets/icons/fire-green.png";
 import campRed from "../assets/icons/fire-red.png";
 
+// City icons
+import cityDefault from "../assets/icons/city-white.png";
+import cityGreen from "../assets/icons/city-green.png";
+import cityRed from "../assets/icons/city-red.png";
+
 // Shop icons
 import shopDefault from "../assets/icons/shop-white.png";
 import shopGreen from "../assets/icons/shop-green.png";
@@ -43,6 +48,18 @@ export function getCampIcon(status) {
     status === "visited" ? campGreen :
     status === "skipped" ? campRed :
     campDefault;
+
+  return new L.Icon({
+    iconUrl,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32]
+  });
+}
+export function getCityIcon(status) {
+  let iconUrl =
+    status === "visited" ? cityGreen :
+    status === "skipped" ? cityRed :
+    cityDefault;
 
   return new L.Icon({
     iconUrl,
