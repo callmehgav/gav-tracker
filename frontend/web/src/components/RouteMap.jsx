@@ -7,6 +7,7 @@ import LocationMenu from "./LocationMenu";
 import AddStopPopup from "./AddStopPopup";
 
 import {
+  getUs,
   getCampIcon,
   getCityIcon,
   getParkIcon,
@@ -43,8 +44,21 @@ export default function RouteMap({
 
   const mapRef = useRef(null);
 
+
+  // Find the latest visited stop
+  const visitedStops = points.filter(p => p.status === "visited");
+  const latestVisited = visitedStops[visitedStops.length - 1];
+
   // ICON PICKER
   function getIcon(p) {
+    // Override icon if this is the newest visited stop
+    if (latestVisited && p.id === latestVisited.id) {
+      
+    const icon = getUs();
+    // FORCE this marker above all others
+    icon.options.zIndexOffset = 99999;
+      return icon; // uses your us.png icon
+    }
     if (p.type === "national_park") return getParkIcon(p.status);
     if (p.type === "snow_resort") return getSnowIcon(p.status);
     if (p.type === "camp") return getCampIcon(p.status);
@@ -122,17 +136,27 @@ export default function RouteMap({
           />
         ))}
 
+
         {/* MARKERS */}
-        {points.map((p, index) => (
-          <Marker
-            key={p.id ?? index}
-            position={[p.lat, p.lng]}
-            icon={getIcon(p)}
-            eventHandlers={{
-              click: () => handleMarkerClick(index, p)
-            }}
-          />
-        ))}
+        {points.map((p, index) => {
+  const isLatest =
+    latestVisited &&
+    p.lat === latestVisited.lat &&
+    p.lng === latestVisited.lng;
+
+  return (
+    <Marker
+      key={p.id ?? index}
+      position={[p.lat, p.lng]}
+      zIndexOffset={isLatest ? 999999 : 0}   // ← THE FIX
+      icon={getIcon(p)}
+      eventHandlers={{
+        click: () => handleMarkerClick(index, p)
+      }}
+    />
+  );
+})}
+
       </MapContainer>
 
       {/* LOCATION MENU — follows map movement */}

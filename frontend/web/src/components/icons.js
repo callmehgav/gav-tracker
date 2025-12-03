@@ -1,5 +1,7 @@
 import L from "leaflet";
-
+//us!
+import us from "../assets/icons/us.png";
+import "../styles/map-icons.css";
 // National park icons
 import parkDefault from "../assets/icons/national-park-white.png";
 import parkGreen from "../assets/icons/national-park-green.png";
@@ -29,6 +31,15 @@ import shopRed from "../assets/icons/shop-red.png";
 import monumentDefault from "../assets/icons/monument-white.png"
 import monumentGreen from "../assets/icons/monument-green.png"
 import monumentRed from "../assets/icons/monument-red.png"
+
+export function getUs() {
+  return L.divIcon({
+    html: `<img src="${us}" style="width:60px;height:60px;" />`,
+    className: "us-pulse", // allows CSS pulse
+    iconSize: [60, 60],
+    iconAnchor: [30, 60]   // center of a 60×60 icon
+  });
+}
 
 export function getParkIcon(status) {
   let iconUrl =
