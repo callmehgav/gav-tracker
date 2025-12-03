@@ -8,6 +8,9 @@
 .us-pulse {
   position: relative;
 }
+.us-pulse img {
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, .9));
+}
 
 .us-pulse::after {
   content: "";
@@ -35,3 +38,4 @@
     opacity: 0;
   }
 }
+

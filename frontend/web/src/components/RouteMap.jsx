@@ -119,7 +119,8 @@ export default function RouteMap({
       
       <MapContainer
         ref={mapRef}
-        center={[points[0].lat, points[0].lng]}
+        //center={[points[0].lat, points[0].lng]}
+        center= {[latestVisited.lat,latestVisited.lng]}
         zoom={4}
         zoomControl={false}
         style={{ height: "100%", width: "100%" }}
