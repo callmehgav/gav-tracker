@@ -20,6 +20,84 @@ function App() {
   const [toast, setToast] = useState(null)
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [playback, setPlayback] = useState({
+  mode: false,      // are we in playback mode
+  playing: false,   // is animation running
+  index: 0,         // current route index
+  speed: 1,         // 1,2,3,5,10
+  direction: 1      // 1 forward, -1 reverse
+});
+function enterPlaybackMode() {
+  setPlayback({
+    mode: true,
+    playing: true,
+    index: 0,
+    speed: 1,
+    direction: 1
+  });
+}
+function exitPlaybackMode() {
+  setPlayback(p => ({
+    ...p,
+    mode: false,
+    playing: false,
+    index: 0,
+    direction: 1
+  }));
+}
+function togglePlayPause() {
+  setPlayback(p => ({
+    ...p,
+    playing: !p.playing
+  }));
+}
+
+
+function resetToStart() {
+  setPlayback(p => ({
+    ...p,
+    index: 0,
+    direction: 1,
+    playing: true
+  }));
+}
+function setPlaybackSpeed(newSpeed) {
+  setPlayback(p => ({
+    ...p,
+    speed: newSpeed
+  }));
+}
+
+function reverse() {
+  setPlayback(p => {
+    
+    const speeds = [ -2, -5, -7, -10, -100];
+    const currentIndex = speeds.indexOf(p.speed);
+    const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
+
+    return {
+    ...p,
+    speed: nextSpeed,
+    direction: 1,
+    playing: true
+    }
+  });
+}
+function fastForward() {
+  setPlayback(p => {
+    const speeds = [ 2, 5, 7, 10, 100];
+    const currentIndex = speeds.indexOf(p.speed);
+    const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
+
+    return {
+      ...p,
+      speed: nextSpeed,
+      direction: 1,
+      playing: true
+    };
+  });
+}
+
 
   function handleLoginStatusChange(status) {
     setIsLoggedIn(status);
@@ -171,23 +249,39 @@ const handleAddStop = useCallback((insertIndex, newStop) => {
   return (
   <>
     <div className="app-wrapper">
-      <StatsBar
-        {...stats}
-        onLoginStatusChange={handleLoginStatusChange}
-        onSave={handleSave}
-        onDiscard={handleDiscard}
-        showToast={showToast}
-      />
+    <StatsBar
+      {...stats}
+      onLoginStatusChange={handleLoginStatusChange}
+      onSave={handleSave}
+      onDiscard={handleDiscard}
+      showToast={showToast}
 
-      <RouteMap
-        points={editingPoints}
-        routes={routes}
-        loggedIn={isLoggedIn}
-        onChange={handleStopChange}
-        onDelete={handleStopDelete}
-        onAddStop={handleAddStop}
-      />
-    </div>
+      /* Playback props */
+      playback={playback}
+      enterPlaybackMode={enterPlaybackMode}
+      exitPlaybackMode={exitPlaybackMode}
+      togglePlayPause={togglePlayPause}
+      reverse={reverse}
+      resetToStart={resetToStart}
+      setPlaybackSpeed={setPlaybackSpeed}
+      fastForward={fastForward}
+
+    />
+
+    <RouteMap
+      points={editingPoints}
+      routes={routes}
+      loggedIn={isLoggedIn}
+      onChange={handleStopChange}
+      onDelete={handleStopDelete}
+      onAddStop={handleAddStop}
+
+      /* Playback props */
+      playback={playback}
+      setPlayback={setPlayback}
+    />
+  </div>
+
 
     {toast && <div className="global-toast">{toast}</div>}
 

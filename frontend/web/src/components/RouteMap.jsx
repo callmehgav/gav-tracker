@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { MapContainer, TileLayer, Polyline, Marker } from "react-leaflet";
+import { MapContainer, TileLayer, Polyline, Marker,Pane } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -32,33 +32,28 @@ export default function RouteMap({
   loggedIn,
   onChange,
   onDelete,
-  onAddStop
+  onAddStop,
+  playback,
+  setPlayback
 }) {
   const [selectedIndex, setSelectedIndex] = useState(null);
-
-  //  store lat/lng instead of fixed pixel coords
   const [selectedLatLng, setSelectedLatLng] = useState(null);
-
   const [menuPos, setMenuPos] = useState(null);
   const [addMenu, setAddMenu] = useState(null);
+  const [cameraFree, setCameraFree] = useState(false);
+  const mapMovingProgrammatically = useRef(false);
+  const [playbackTrail, setPlaybackTrail] = useState([]);
 
   const mapRef = useRef(null);
 
+  // Playback marker (moving US)
+  const [playbackPosition, setPlaybackPosition] = useState(null);
 
-  // Find the latest visited stop
+  // Latest visited stop
   const visitedStops = points.filter(p => p.status === "visited");
   const latestVisited = visitedStops[visitedStops.length - 1];
 
-  // ICON PICKER
-  function getIcon(p) {
-    // Override icon if this is the newest visited stop
-    if (latestVisited && p.id === latestVisited.id) {
-      
-    const icon = getUs();
-    // FORCE this marker above all others
-    icon.options.zIndexOffset = 99999;
-      return icon; // uses your us.png icon
-    }
+    function getIconByType(p) {
     if (p.type === "national_park") return getParkIcon(p.status);
     if (p.type === "snow_resort") return getSnowIcon(p.status);
     if (p.type === "camp") return getCampIcon(p.status);
@@ -68,27 +63,46 @@ export default function RouteMap({
     return getCampIcon(p.status);
   }
 
-  //  Convert a lat/lng to screen pixels
-  // Convert a lat/lng to screen pixels
+  // ICON PICKER
+  function getIcon(p) {
+    // If this is the latest visited stop
+    if (latestVisited && p.id === latestVisited.id) {
+
+      // During playback → use the normal icon (no us.png)
+      if (playback.mode) {
+        return getIconByType(p); // fallback to type icon
+      }
+
+      // Normal mode → Highlight with US icon
+      const icon = getUs();
+      icon.options.zIndexOffset = 99999;
+      return icon;
+    }
+
+    if (p.type === "national_park") return getParkIcon(p.status);
+    if (p.type === "snow_resort") return getSnowIcon(p.status);
+    if (p.type === "camp") return getCampIcon(p.status);
+    if (p.type === "city") return getCityIcon(p.status);
+    if (p.type === "shop") return getShopIcon(p.status);
+    if (p.type === "monument") return getMonumentIcon(p.status);
+    return getCampIcon(p.status);
+  }
+
+  // Convert lat/lng to screen point
   const updateMenuPosition = useCallback(() => {
     if (!selectedLatLng || !mapRef.current) return;
 
     const map = mapRef.current;
     const point = map.latLngToContainerPoint(selectedLatLng);
-
     setMenuPos({ x: point.x, y: point.y });
   }, [selectedLatLng]);
 
-
-  //  Recalculate menu position when the map moves/zooms
-  // Recalculate menu position when the map moves/zooms
+  // Update menu when map moves
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    function moveHandler() {
-      updateMenuPosition();
-    }
+    const moveHandler = () => updateMenuPosition();
 
     map.on("move", moveHandler);
     map.on("zoom", moveHandler);
@@ -97,70 +111,190 @@ export default function RouteMap({
       map.off("move", moveHandler);
       map.off("zoom", moveHandler);
     };
-  }, [updateMenuPosition]);   // <— FIXED
+  }, [updateMenuPosition]);
+
+  // Initialize playback marker
+  
+/* eslint-disable react-hooks/exhaustive-deps */
+useEffect(() => {
+    if (playback?.mode) {
+      // Build full animation path
+      const path = routes
+        .filter(r => r.visited)
+        .flatMap(r => r.coords);
+
+      if (path.length > 0) {
+        setPlaybackPosition(path[0]);
+        setPlaybackTrail([path[0]]); // reset trail to starting point
+      }
+    } else {
+      setPlaybackPosition(null);
+      setPlaybackTrail([]); // clear trail when playback exits
+    }
+  }, [playback?.mode]);
+
+  // PLAYBACK ANIMATION LOOP
+  
+useEffect(() => {
+  if (!playback?.mode || !playback?.playing) return;
+
+  setCameraFree(false);
+
+  const animationPath = routes
+    .filter(r => r.visited)
+    .flatMap(r => r.coords);
+
+  if (!animationPath.length) return;
+
+  const interval = setInterval(() => {
+    setPlayback(prev => {
+      if (!prev.mode || !prev.playing) return prev;
+
+      let nextIndex = prev.index + prev.direction * prev.speed;
+      const lastIndex = animationPath.length - 1;
+
+      if (nextIndex < 0) nextIndex = 0;
+      if (nextIndex > lastIndex) return { ...prev, playing: false };
+
+      const nextPoint = animationPath[nextIndex];
+      setPlaybackPosition(nextPoint);
+      setPlaybackTrail(t => {
+        // prevent duplicates
+        if (t.length && t[t.length - 1][0] === nextPoint[0] && t[t.length - 1][1] === nextPoint[1]) {
+          return t;
+        }
+        return [...t, nextPoint];
+      });
+      if (mapRef.current && !cameraFree) {
+        mapMovingProgrammatically.current = true;
+
+        mapRef.current.setView(
+          nextPoint,
+          mapRef.current.getZoom(),
+          { animate: true }
+        );
+
+        setTimeout(() => {
+          mapMovingProgrammatically.current = false;
+        }, 80);
+      }
+
+      return { ...prev, index: nextIndex };
+    });
+  }, 60);
+
+  return () => clearInterval(interval);
+}, [
+  playback.mode,
+  playback.playing,
+  playback.speed,
+  playback.direction
+  // DO NOT add cameraFree or setPlayback
+  // DO NOT add routes
+]);
+/* eslint-enable react-hooks/exhaustive-deps */
 
 
-  // When a new marker is clicked, immediately update position
+  // Update menu position if selected
   useEffect(() => {
     updateMenuPosition();
   }, [selectedLatLng, updateMenuPosition]);
 
-  //  Click handler now stores lat/lng
+  // Marker click
   function handleMarkerClick(index, stop) {
     setSelectedIndex(index);
     setSelectedLatLng([stop.lat, stop.lng]);
     setAddMenu(null);
   }
 
+  const initialCenter = latestVisited
+    ? [latestVisited.lat, latestVisited.lng]
+    : [39.5, -98.35];
+
   return (
     <div style={{ height: "100vh", width: "100vw", position: "relative" }}>
-
-      {/* MAP */}
-      
       <MapContainer
-        ref={mapRef}
-        //center={[points[0].lat, points[0].lng]}
-        center= {[latestVisited.lat,latestVisited.lng]}
+      whenCreated={map => {
+          mapRef.current = map;
+
+          // When user drags or zooms, release camera clamp
+          map.on("movestart", () => {
+          if (mapMovingProgrammatically.current) return; // ignore programmatic moves
+
+          if (playback.playing) {
+            setCameraFree(true);
+          }
+        });
+
+        }}
+
+        center={initialCenter}
         zoom={4}
         zoomControl={false}
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png" />
 
+        {/* GREEN LIVE PLAYBACK TRAIL */}
+        {playbackTrail.length > 1 && (
+          <Polyline
+            positions={playbackTrail}
+            color="lime"
+            weight={6}
+            pane="visitedPane"
+          />
+        )}
+
+        {/* Higher z-index pane for visited routes */}
+        <Pane name="visitedPane" style={{ zIndex: 700 }} />
+
+        {/* Lower z-index pane for unvisited routes */}
+        <Pane name="unvisitedPane" style={{ zIndex: 600 }} />
         {/* ROUTES */}
-        {routes.map((route) => (
+        {routes.map(route => (
+          
           <Polyline
             key={route.key}
             positions={route.coords}
             color={route.visited ? "dodgerblue" : "gray"}
             weight={5}
+            pane={route.visited ? "visitedPane" : "unvisitedPane"}
           />
         ))}
 
-
-        {/* MARKERS */}
+        {/* STATIC MARKERS */}
         {points.map((p, index) => {
-  const isLatest =
-    latestVisited &&
-    p.lat === latestVisited.lat &&
-    p.lng === latestVisited.lng;
+          const isLatest =
+            latestVisited &&
+            p.lat === latestVisited.lat &&
+            p.lng === latestVisited.lng;
+            
 
-  return (
-    <Marker
-      key={p.id ?? index}
-      position={[p.lat, p.lng]}
-      zIndexOffset={isLatest ? 999999 : 0}   // ← THE FIX
-      icon={getIcon(p)}
-      eventHandlers={{
-        click: () => handleMarkerClick(index, p)
-      }}
-    />
-  );
-})}
+            return (
+              <Marker
+                key={p.id ?? index}
+                position={[p.lat, p.lng]}
+                zIndexOffset={isLatest ? 999999 : 0}
+                icon={getIcon(p)}
+                eventHandlers={{
+                  click: () => handleMarkerClick(index, p)
+                }}
+              />
+            );
 
+        })}
+
+        {/* PLAYBACK MARKER */}
+        {playbackPosition && (
+          <Marker
+            position={playbackPosition}
+            icon={getUs()}
+            zIndexOffset={999999}
+          />
+        )}
       </MapContainer>
 
-      {/* LOCATION MENU — follows map movement */}
+      {/* LOCATION MENU */}
       {selectedIndex !== null && menuPos && (
         <div
           style={{
@@ -178,7 +312,7 @@ export default function RouteMap({
             loggedIn={loggedIn}
             onChange={onChange}
             onDelete={onDelete}
-            onAddStopClick={(idx) =>
+            onAddStopClick={idx =>
               setAddMenu({ index: idx, position: menuPos })
             }
             onClose={() => {
