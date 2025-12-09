@@ -90,12 +90,14 @@ export default function RouteMap({
 
   // Convert lat/lng to screen point
   const updateMenuPosition = useCallback(() => {
-    if (!selectedLatLng || !mapRef.current) return;
+    if (!selectedLatLng || !mapRef.current) {
+      console.log("bad LatLng Data: "+selectedLatLng+ " or "+!mapRef.current)
+      return;}
 
     const map = mapRef.current;
     const point = map.latLngToContainerPoint(selectedLatLng);
     setMenuPos({ x: point.x, y: point.y });
-  }, [selectedLatLng]);
+  }, [selectedLatLng, mapRef]);
 
   // Update menu when map moves
   useEffect(() => {
@@ -192,16 +194,26 @@ useEffect(() => {
   // DO NOT add cameraFree or setPlayback
   // DO NOT add routes
 ]);
-/* eslint-enable react-hooks/exhaustive-deps */
+// Update menu position when a marker is selected, retry if map isn't ready yet
+useEffect(() => {
+  if (!selectedLatLng) return;
 
+  // If map isn't ready on first click, retry shortly
+  if (!mapRef.current) {
+    console.log("map not ready, retrying updateMenuPosition...");
+    setTimeout(() => {
+      updateMenuPosition();
+    }, 50);
+    return;
+  }
 
-  // Update menu position if selected
-  useEffect(() => {
-    updateMenuPosition();
-  }, [selectedLatLng, updateMenuPosition]);
+  updateMenuPosition();
+}, [selectedLatLng]);
+
 
   // Marker click
   function handleMarkerClick(index, stop) {
+    
     setSelectedIndex(index);
     setSelectedLatLng([stop.lat, stop.lng]);
     setAddMenu(null);
@@ -214,19 +226,7 @@ useEffect(() => {
   return (
     <div style={{ height: "100vh", width: "100vw", position: "relative" }}>
       <MapContainer
-      whenCreated={map => {
-          mapRef.current = map;
-
-          // When user drags or zooms, release camera clamp
-          map.on("movestart", () => {
-          if (mapMovingProgrammatically.current) return; // ignore programmatic moves
-
-          if (playback.playing) {
-            setCameraFree(true);
-          }
-        });
-
-        }}
+      ref={mapRef}
 
         center={initialCenter}
         zoom={4}
@@ -235,22 +235,19 @@ useEffect(() => {
       >
         <TileLayer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png" />
 
-        {/* GREEN LIVE PLAYBACK TRAIL */}
-        {playbackTrail.length > 1 && (
+        {/* PANE DEFINITIONS MUST COME FIRST */}
+        <Pane name="visitedPane" style={{ zIndex: 700 }} />
+        <Pane name="unvisitedPane" style={{ zIndex: 600 }} />
+        <Pane name="trailPane" style={{ zIndex: 800 }} />  
+                {/* GREEN TRAIL */}
+          {playbackTrail.length > 1 && (
           <Polyline
             positions={playbackTrail}
             color="lime"
             weight={6}
-            pane="visitedPane"
+            pane="trailPane"
           />
-        )}
-
-        {/* Higher z-index pane for visited routes */}
-        <Pane name="visitedPane" style={{ zIndex: 700 }} />
-
-        {/* Lower z-index pane for unvisited routes */}
-        <Pane name="unvisitedPane" style={{ zIndex: 600 }} />
-        {/* ROUTES */}
+        )}    
         {routes.map(route => (
           
           <Polyline
@@ -261,6 +258,7 @@ useEffect(() => {
             pane={route.visited ? "visitedPane" : "unvisitedPane"}
           />
         ))}
+
 
         {/* STATIC MARKERS */}
         {points.map((p, index) => {
@@ -303,7 +301,8 @@ useEffect(() => {
             top: menuPos.y - 20,
             transform: "translate(-50%, -100%)",
             zIndex: 99990,
-            pointerEvents: "auto"
+            pointerEvents: "auto",
+            
           }}
         >
           <LocationMenu
@@ -312,7 +311,7 @@ useEffect(() => {
             loggedIn={loggedIn}
             onChange={onChange}
             onDelete={onDelete}
-            onAddStopClick={idx =>
+            onAddStopClick={(idx )=>
               setAddMenu({ index: idx, position: menuPos })
             }
             onClose={() => {
