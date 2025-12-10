@@ -1,0 +1,118 @@
+.addstop-card {
+  background: #111;
+  border-radius: 12px;
+  padding: 18px;
+  width: 320px;
+
+  color: #eee;
+  border: 1px solid #333;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+
+  backdrop-filter: blur(6px);
+}
+
+.addstop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.addstop-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.addstop-close {
+  background: transparent;
+  border: none;
+  color: #bbb;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.addstop-close:hover {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.addstop-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.addstop-field label {
+  font-size: 11px;
+  margin-bottom: 4px;
+  color: #bbb;
+}
+
+.addstop-field input,
+.addstop-field select {
+  background: #222;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 6px;
+  color: #eee;
+  font-size: 13px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.addstop-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.addstop-row .addstop-field {
+  flex: 1;        /* <— makes Latitude and Longitude EXACT same width */
+}
+
+.addstop-submit {
+  width: 100%;
+  background: #0077ff;
+  border: none;
+  padding: 10px;
+  margin-top: 10px;
+
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.addstop-submit:hover {
+  background: #0d8dff;
+}
+
+/* Name row with Close button inline */
+.addstop-name-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+/* Make close button align better visually */
+.addstop-name-row .addstop-close {
+  margin-bottom: 4px;
+}
+
+/* Dark theme number input arrows hidden */
+.addstop-field input[type="number"]::-webkit-inner-spin-button,
+.addstop-field input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+.addstop-field input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+}

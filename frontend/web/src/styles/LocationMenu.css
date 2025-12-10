@@ -1,0 +1,114 @@
+.location-menu-card {
+  background: #111;
+  border-radius: 8px;
+  padding: 10px;
+  min-width: 220px;
+  max-width: 260px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  border: 1px solid #333;
+  color: #eee;
+  font-size: 12px;
+}
+.location-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.location-menu-header .field-group {
+  flex: 1;            /* <—— Makes name input stretch full width */
+  margin-bottom: 0;   /* removes extra spacing inside header */
+}
+
+.location-menu-close {
+  background: transparent;
+  border: none;
+  color: #bbb;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.location-menu-close:hover {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+
+.location-menu-title {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 6px;
+}
+
+.field-group label {
+  font-size: 11px;
+  margin-bottom: 2px;
+  color: #bbb;
+}
+
+.field-group select,
+.field-group input,
+.field-group textarea {
+  background: #222;
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 4px;
+  font-size: 11px;
+  color: #eee;
+}
+
+.field-group textarea {
+  resize: vertical;
+  min-height: 40px;
+}
+
+.notes-display {
+  background: #222;
+  border-radius: 4px;
+  padding: 4px;
+  min-height: 32px;
+  font-size: 11px;
+}
+
+.coords-display {
+  font-family: monospace;
+  background: #222;
+  border-radius: 4px;
+  padding: 4px;
+  font-size: 11px;
+}
+
+.location-menu-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.add-btn,
+.delete-btn {
+  flex: 1;
+  padding: 4px;
+  border-radius: 4px;
+  border: none;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.add-btn {
+  background: #0077ff;
+  color: white;
+}
+
+.delete-btn {
+  background: #aa0000;
+  color: white;
+}
+
