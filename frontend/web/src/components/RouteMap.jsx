@@ -236,9 +236,9 @@ useEffect(() => {
 
         {/* PANE DEFINITIONS MUST COME FIRST */}
         <Pane name="playbackPane" style={{ zIndex: 20000 }} />
+        <Pane name="trailPane" style={{ zIndex: 700 }} />  
         <Pane name="visitedPane" style={{ zIndex: 600 }} />
         <Pane name="unvisitedPane" style={{ zIndex: 500 }} />
-        <Pane name="trailPane" style={{ zIndex: 700 }} />  
                 {/* GREEN TRAIL */}
           {playbackTrail.length > 1 && (
           <Polyline
