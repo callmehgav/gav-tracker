@@ -136,7 +136,6 @@ useEffect(() => {
   }, [playback?.mode]);
 
   // PLAYBACK ANIMATION LOOP
-  
 useEffect(() => {
   if (!playback?.mode || !playback?.playing) return;
 
@@ -236,15 +235,16 @@ useEffect(() => {
         <TileLayer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png" />
 
         {/* PANE DEFINITIONS MUST COME FIRST */}
-        <Pane name="visitedPane" style={{ zIndex: 700 }} />
-        <Pane name="unvisitedPane" style={{ zIndex: 600 }} />
-        <Pane name="trailPane" style={{ zIndex: 800 }} />  
+        <Pane name="playbackPane" style={{ zIndex: 20000 }} />
+        <Pane name="visitedPane" style={{ zIndex: 600 }} />
+        <Pane name="unvisitedPane" style={{ zIndex: 500 }} />
+        <Pane name="trailPane" style={{ zIndex: 700 }} />  
                 {/* GREEN TRAIL */}
           {playbackTrail.length > 1 && (
           <Polyline
             positions={playbackTrail}
             color="lime"
-            weight={6}
+            weight={2}
             pane="trailPane"
           />
         )}    
@@ -254,8 +254,9 @@ useEffect(() => {
             key={route.key}
             positions={route.coords}
             color={route.visited ? "dodgerblue" : "gray"}
-            weight={5}
+            weight={4}
             pane={route.visited ? "visitedPane" : "unvisitedPane"}
+            
           />
         ))}
 
@@ -287,7 +288,7 @@ useEffect(() => {
           <Marker
             position={playbackPosition}
             icon={getUs()}
-            zIndexOffset={999999}
+            pane="playbackPane" 
           />
         )}
       </MapContainer>

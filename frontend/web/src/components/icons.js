@@ -34,7 +34,7 @@ import monumentRed from "../assets/icons/monument-red.png"
 
 export function getUs() {
   return L.divIcon({
-    html: `<img src="${us}" style="width:60px;height:60px;" />`,
+    html: `<img src="${us}" style="width:60px;height:60px; z-index:9999999;"/>`,
     className: "us-pulse", // allows CSS pulse
     iconSize: [60, 60],
     iconAnchor: [30, 60]   // center of a 60×60 icon

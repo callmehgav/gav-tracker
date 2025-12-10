@@ -18,7 +18,7 @@ export function computeStats(routes, points) {
     p => p.type === "snow_resort" && p.status === "visited"
   ).length;
 
-  const startDate = new Date("2025-11-14");
+  const startDate = new Date("2025-12-15");
   const today = new Date();
 
   const daysSinceStart = Math.floor(

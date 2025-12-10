@@ -71,7 +71,7 @@ function setPlaybackSpeed(newSpeed) {
 function reverse() {
   setPlayback(p => {
     
-    const speeds = [ -2, -5, -7, -10, -100];
+    const speeds = [ -2, -5, -7, -10, -100,-1000];
     const currentIndex = speeds.indexOf(p.speed);
     const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
 
@@ -85,7 +85,7 @@ function reverse() {
 }
 function fastForward() {
   setPlayback(p => {
-    const speeds = [ 2, 5, 7, 10, 100];
+    const speeds = [ 2, 5, 7, 10, 100,1000];
     const currentIndex = speeds.indexOf(p.speed);
     const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
 
@@ -143,10 +143,23 @@ function fastForward() {
   // --------------------------------------------------
   // BUILD ROUTES after loading
   // --------------------------------------------------
-  useEffect(() => {
+  /*useEffect(() => {
     if (!trip) return;
     buildRoutesFromPoints(trip.points, setRoutes);
+  }, [trip]);*/
+  
+  // LOAD ROUTES FROM BACKEND
+  useEffect(() => {
+    if (!trip) return;
+
+    fetch(`${API}/get-routes.php`)
+      .then(res => res.json())
+      .then(data => {
+        setRoutes(data);
+      })
+      .catch(err => console.error("Failed to load routes:", err));
   }, [trip]);
+
 
   
 // Build routes live as user edits stops
