@@ -12,6 +12,6 @@ COPY frontend/web/build /app/frontend/web/build
 ENV WEB_DOCUMENT_ROOT=/app/backend/public
 
 # IMPORTANT: Tell NGINX to listen on Railway's runtime port
-ENV WEB_PORT=$PORT
+ENV WEB_PORT=8080
 
 EXPOSE 8080
