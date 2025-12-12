@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "../styles/StatBar.css";
 import logo from "../assets/logos/logoNoWords.png";
-import { Play, Pause, Rewind, FastForward, Square } from "lucide-react";
+import { Play, Pause, Rewind, FastForward, Square, AlignVerticalJustifyEnd } from "lucide-react";
 
 export default function StatsBar({
   totalMiles,
@@ -32,8 +32,8 @@ export default function StatsBar({
   const [loggedIn, setLoggedIn] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [username, setUsername] = useState("Admin");
-  const [password, setPassword] = useState("Password1");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [editMaint, setEditMaint] = useState(maintananceCost??"");
 
 
