@@ -1,20 +1,22 @@
-FROM webdevops/php-nginx:8.2-alpine
+FROM php:8.2-fpm-alpine AS php
+
+# Install PHP extensions if needed
+RUN docker-php-ext-install pdo pdo_mysql
+
+FROM nginx:1.27-alpine AS nginx
 
 WORKDIR /app
 
-# Copy backend PHP
+# Copy backend PHP into a directory served by PHP-FPM
 COPY backend /app/backend
 
-# Copy frontend React build
+# Copy React build into a static folder
 COPY frontend/web/build /app/frontend/web/build
 
-# Nginx document root points to backend/public
-ENV WEB_DOCUMENT_ROOT=/app/backend/public
+# Copy NGINX config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# IMPORTANT: Tell NGINX to listen on Railway's runtime port
-ENV WEB_PORT=8080
-
-RUN echo "NGINX will listen on: $WEB_PORT"
-
-
+# Expose port 8080 (Railway expects this)
 EXPOSE 8080
+
+CMD ["nginx", "-g", "daemon off;"]
