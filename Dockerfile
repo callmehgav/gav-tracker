@@ -14,4 +14,7 @@ ENV WEB_DOCUMENT_ROOT=/app/backend/public
 # IMPORTANT: Tell NGINX to listen on Railway's runtime port
 ENV WEB_PORT=8080
 
+RUN echo "NGINX will listen on: $WEB_PORT"
+
+
 EXPOSE 8080
