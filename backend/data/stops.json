@@ -38,7 +38,7 @@
         "lat": 34.7445,
         "lng": -92.288,
         "type": "city",
-        "status": "visited",
+        "status": "planned",
         "notes": "",
         "arrived_at": "",
         "departed_at": ""
@@ -49,7 +49,7 @@
         "lat": 35.4689,
         "lng": -97.5195,
         "type": "city",
-        "status": "visited",
+        "status": "planned",
         "notes": "",
         "arrived_at": "",
         "departed_at": ""
@@ -60,7 +60,7 @@
         "lat": 34.937,
         "lng": -101.646,
         "type": "national_park",
-        "status": "visited",
+        "status": "planned",
         "notes": "",
         "arrived_at": "",
         "departed_at": ""

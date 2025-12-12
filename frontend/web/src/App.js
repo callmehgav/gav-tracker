@@ -1,9 +1,8 @@
-import { useEffect, useState , useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import RouteMap from "./components/RouteMap";
 import StatsBar from "./components/StatBar";
 import "./App.css";
-
-import { buildRoutesFromPoints } from "./utils/routeBuilder";
+import LoadingScreen from "./components/LoadingScreen";
 import { computeStats } from "./utils/stats";
 
 function App() {
@@ -11,106 +10,133 @@ function App() {
   // const API = "http://localhost:8000"; // uncomment if not using env file
 
   const [trip, setTrip] = useState(null);
-  const [editingPoints, setEditingPoints] = useState([]); 
+  const [editingPoints, setEditingPoints] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [routes, setRoutes] = useState([]);
   const [stats, setStats] = useState(null);
 
-  const [toast, setToast] = useState(null)
+  const [toast, setToast] = useState(null);
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [playback, setPlayback] = useState({
-  mode: false,      // are we in playback mode
-  playing: false,   // is animation running
-  index: 0,         // current route index
-  speed: 1,         // 1,2,3,5,10
-  direction: 1      // 1 forward, -1 reverse
-});
-function enterPlaybackMode() {
-  setPlayback({
-    mode: true,
-    playing: true,
-    index: 0,
-    speed: 1,
-    direction: 1
+    mode: false,     // are we in playback mode
+    playing: false,  // is animation running
+    speed: 1,        // 1,2,5,10,100,...
+    direction: 1     // 1 forward, -1 reverse
   });
-}
-function exitPlaybackMode() {
-  setPlayback(p => ({
-    ...p,
-    mode: false,
-    playing: false,
-    index: 0,
-    direction: 1
-  }));
-}
-function togglePlayPause() {
-  setPlayback(p => ({
-    ...p,
-    playing: !p.playing
-  }));
-}
 
+  // PLAYBACK CONTROLS ----------------------------
+  function enterPlaybackMode() {
+    setPlayback({
+      mode: true,
+      playing: true,
+      speed: 1,
+      direction: 1
+    });
+  }
 
-function resetToStart() {
-  setPlayback(p => ({
-    ...p,
-    index: 0,
-    direction: 1,
-    playing: true
-  }));
-}
-function setPlaybackSpeed(newSpeed) {
-  setPlayback(p => ({
-    ...p,
-    speed: newSpeed
-  }));
-}
+  function exitPlaybackMode() {
+    // full reset out of playback mode
+    setPlayback({
+      mode: false,
+      playing: false,
+      speed: 1,
+      direction: 1
+    });
+  }
 
+  function togglePlayPause() {
+    setPlayback(p => ({
+      ...p,
+      playing: !p.playing
+    }));
+  }
+
+  function stopPlayback() {
+    // hard stop: also exits playback mode so RouteMap clears trail + marker
+    setPlayback({
+      mode: false,
+      playing: false,
+      speed: 1,
+      direction: 1
+    });
+  }
+
+  function resetToStart() {
+    // let RouteMap handle actual index reset; this just ensures we're playing forward
+    setPlayback(p => ({
+      ...p,
+      direction: 1,
+      playing: true
+    }));
+  }
+
+  function setPlaybackSpeed(newSpeed) {
+    setPlayback(p => ({
+      ...p,
+      speed: newSpeed
+    }));
+  }
 function reverse() {
   setPlayback(p => {
-    
-    const speeds = [ -2, -5, -7, -10, -100,-1000];
-    const currentIndex = speeds.indexOf(p.speed);
-    const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
+    const speeds = [-2, -5, -10, -100, -1000];
 
-    return {
-    ...p,
-    speed: nextSpeed,
-    direction: 1,
-    playing: true
+    // Already reversing → cycle speeds
+    if (p.speed < 0) {
+      const currentIndex = speeds.indexOf(p.speed);
+      const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
+      return {
+        ...p,
+        speed: nextSpeed,
+        playing: true
+      };
     }
+
+    // Was going forward → reset to -2x
+    return {
+      ...p,
+      speed: -2,
+      playing: true
+    };
   });
 }
 function fastForward() {
   setPlayback(p => {
-    const speeds = [ 2, 5, 7, 10, 100,1000];
-    const currentIndex = speeds.indexOf(p.speed);
-    const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
+    const speeds = [2, 5, 10, 100, 1000];
 
+    // Already forward → cycle speeds
+    if (p.speed > 0) {
+      const currentIndex = speeds.indexOf(p.speed);
+      const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
+      return {
+        ...p,
+        speed: nextSpeed,
+        playing: true
+      };
+    }
+
+    // Was reversing → reset to forward 2x
     return {
       ...p,
-      speed: nextSpeed,
-      direction: 1,
+      speed: 2,
       playing: true
     };
   });
 }
 
-
+  // AUTH / TOAST ----------------------------
   function handleLoginStatusChange(status) {
     setIsLoggedIn(status);
   }
 
-  function showToast(msg){
-      console.log("TOAST:", msg); // <–– debug
+  function showToast(msg) {
+    console.log("TOAST:", msg);
     setToast(msg);
-    setTimeout(()=> setToast(null),5000);
+    setTimeout(() => setToast(null), 5000);
   }
-  // --------------------------------------------------
-  // LOAD TRIP DATA (stops.json through api-route.php)
-  // --------------------------------------------------
+
+  // LOAD TRIP DATA (stops.json via api-route.php) ----
   useEffect(() => {
     fetch(`${API}/api-route.php`)
       .then(res => res.json())
@@ -124,31 +150,21 @@ function fastForward() {
         setLoading(false);
       });
   }, [API]);
-  // --------------------------------------------------
-  // LOAD maintananceCost
-  // --------------------------------------------------
+
+  // LOAD maintananceCost -----------------------------
   useEffect(() => {
-  fetch(`${API}/getStats.php`)
-    .then(res => res.json())
-    .then(data => {
-      setStats(prev => ({
-        ...(prev || {}),
-        maintananceCost: data.maintananceCost
-      }));
-    })
-    .catch(err => console.error(err));
-}, [API]);
+    fetch(`${API}/getStats.php`)
+      .then(res => res.json())
+      .then(data => {
+        setStats(prev => ({
+          ...(prev || {}),
+          maintananceCost: data.maintananceCost
+        }));
+      })
+      .catch(err => console.error(err));
+  }, [API]);
 
-
-  // --------------------------------------------------
-  // BUILD ROUTES after loading
-  // --------------------------------------------------
-  /*useEffect(() => {
-    if (!trip) return;
-    buildRoutesFromPoints(trip.points, setRoutes);
-  }, [trip]);*/
-  
-  // LOAD ROUTES FROM BACKEND
+  // LOAD ROUTES FROM BACKEND -------------------------
   useEffect(() => {
     if (!trip) return;
 
@@ -158,150 +174,121 @@ function fastForward() {
         setRoutes(data);
       })
       .catch(err => console.error("Failed to load routes:", err));
-  }, [trip]);
+  }, [API, trip]);
 
-
-  
-// Build routes live as user edits stops
-useEffect(() => {
-  if (!editingPoints.length) return;
-  buildRoutesFromPoints(editingPoints, setRoutes);
-}, [editingPoints]);
-
-  // --------------------------------------------------
-  // COMPUTE STATS once routes are built
-  // --------------------------------------------------
+  // COMPUTE STATS once routes are built --------------
   useEffect(() => {
-  if (!trip) return;
-  if (routes.length === 0) return;
+    if (!trip) return;
+    if (routes.length === 0) return;
 
-  const baseStats = computeStats(routes, trip.points);
+    const baseStats = computeStats(routes, trip.points);
 
-  setStats(prev => ({
-    ...(prev || {}),
-    ...baseStats
-  }));
-}, [routes, trip]);
+    setStats(prev => ({
+      ...(prev || {}),
+      ...baseStats,
+      // preserve maintananceCost from previous fetch
+      maintananceCost: prev?.maintananceCost
+    }));
+  }, [routes, trip]);
 
-
-  // --------------------------------------------------
-  // STOP EDIT CALLBACKS
-  // --------------------------------------------------
+  // STOP EDIT CALLBACKS ------------------------------
   const handleStopChange = useCallback((index, updatedStop) => {
-  setEditingPoints(prev => {
-    const updated = [...prev];
-    updated[index] = updatedStop;
-    return updated;
-  });
-}, []);
-
-const handleStopDelete = useCallback((index) => {
-  setEditingPoints(prev => prev.filter((_, i) => i !== index));
-}, []);
-
-const handleAddStop = useCallback((insertIndex, newStop) => {
-  setEditingPoints(prev => {
-    const updated = [...prev];
-    updated.splice(insertIndex + 1, 0, newStop);
-    return updated;
-  });
-}, []);
-
-
-  // --------------------------------------------------
-  // SAVE CHANGES — Batch write to update-stops.php
-  // --------------------------------------------------
-  const handleSave = async () => {
-  try {
-    const res = await fetch(`${API}/update-stops.php`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stops: editingPoints })
+    setEditingPoints(prev => {
+      const updated = [...prev];
+      updated[index] = updatedStop;
+      return updated;
     });
+  }, []);
 
-    if (!res.ok) {
-      showToast("Save failed");
+  const handleStopDelete = useCallback(index => {
+    setEditingPoints(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleAddStop = useCallback((insertIndex, newStop) => {
+    setEditingPoints(prev => {
+      const updated = [...prev];
+      updated.splice(insertIndex + 1, 0, newStop);
+      return updated;
+    });
+  }, []);
+
+  // SAVE CHANGES -------------------------------------
+  const handleSave = async () => {
+    try {
+      const res = await fetch(`${API}/update-stops.php`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stops: editingPoints })
+      });
+
+      if (!res.ok) {
+        showToast("Save failed");
+        return false;
+      }
+
+      const newTrip = await fetch(`${API}/api-route.php`).then(r => r.json());
+      setTrip(newTrip);
+      setEditingPoints(JSON.parse(JSON.stringify(newTrip.points)));
+
+      showToast("Changes saved!");
+      return true;
+    } catch (err) {
+      console.error("Save error:", err);
+      showToast("Error saving changes");
       return false;
     }
+  };
 
-    // Re-fetch data without reloading the page
-    const newTrip = await fetch(`${API}/api-route.php`).then(r => r.json());
-    setTrip(newTrip);
-    setEditingPoints(JSON.parse(JSON.stringify(newTrip.points)));
-
-    showToast("Changes saved!");
-    return true;
-
-  } catch (err) {
-    console.error("Save error:", err);
-    showToast("Error saving changes");
-    return false;
-  }
-};
-
-
-  // --------------------------------------------------
-  // DISCARD CHANGES (restore from loaded trip)
-  // --------------------------------------------------
+  // DISCARD CHANGES ----------------------------------
   const handleDiscard = () => {
     if (!trip) return;
     setEditingPoints(JSON.parse(JSON.stringify(trip.points)));
     showToast("Changes discarded");
   };
 
-  // --------------------------------------------------
-  // LOADING STATES
-  // --------------------------------------------------
-  if (loading) return <div>Loading...</div>;
+  // LOADING STATES -----------------------------------
+  if (loading) return <LoadingScreen />;
   if (!trip) return <div>Error loading trip.</div>;
 
-  // --------------------------------------------------
-  // MAIN UI
-  // --------------------------------------------------
+  // MAIN UI ------------------------------------------
   return (
-  <>
-  
-    <div className="app-wrapper">
-    <StatsBar
-      {...stats}
-      onLoginStatusChange={handleLoginStatusChange}
-      onSave={handleSave}
-      onDiscard={handleDiscard}
-      showToast={showToast}
+    <>
+      <div className="app-wrapper">
+        <StatsBar
+          {...stats}
+          onLoginStatusChange={handleLoginStatusChange}
+          onSave={handleSave}
+          onDiscard={handleDiscard}
+          showToast={showToast}
+          /* Playback props */
+          playback={playback}
+          enterPlaybackMode={enterPlaybackMode}
+          exitPlaybackMode={exitPlaybackMode}
+          togglePlayPause={togglePlayPause}
+          stopPlayback={stopPlayback}
+          reverse={reverse}
+          resetToStart={resetToStart}
+          setPlaybackSpeed={setPlaybackSpeed}
+          fastForward={fastForward}
+        />
 
-      /* Playback props */
-      playback={playback}
-      enterPlaybackMode={enterPlaybackMode}
-      exitPlaybackMode={exitPlaybackMode}
-      togglePlayPause={togglePlayPause}
-      reverse={reverse}
-      resetToStart={resetToStart}
-      setPlaybackSpeed={setPlaybackSpeed}
-      fastForward={fastForward}
+        <RouteMap
+          points={editingPoints}
+          routes={routes}
+          loggedIn={isLoggedIn}
+          onChange={handleStopChange}
+          onDelete={handleStopDelete}
+          onAddStop={handleAddStop}
+          /* Playback props */
+          playback={playback}
+          setPlayback={setPlayback}
+        />
+      </div>
 
-    />
-
-    <RouteMap
-      points={editingPoints}
-      routes={routes}
-      loggedIn={isLoggedIn}
-      onChange={handleStopChange}
-      onDelete={handleStopDelete}
-      onAddStop={handleAddStop}
-
-      /* Playback props */
-      playback={playback}
-      setPlayback={setPlayback}
-    />
-  </div>
-
-
-    {toast && <div className="global-toast">{toast}</div>}
-
-  </>
-);
-
+      {toast && <div className="global-toast">{toast}</div>}
+    </>
+  );
 }
 
 export default App;

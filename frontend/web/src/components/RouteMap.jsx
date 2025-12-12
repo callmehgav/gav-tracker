@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useRef, useEffect, useCallback } from "react";
-import { MapContainer, TileLayer, Polyline, Marker,Pane } from "react-leaflet";
+import { MapContainer, TileLayer, Polyline, Marker, Pane } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -41,19 +42,21 @@ export default function RouteMap({
   const [menuPos, setMenuPos] = useState(null);
   const [addMenu, setAddMenu] = useState(null);
   const [cameraFree, setCameraFree] = useState(false);
-  const mapMovingProgrammatically = useRef(false);
   const [playbackTrail, setPlaybackTrail] = useState([]);
+  const [shownStops, setShownStops] = useState(new Set());
 
   const mapRef = useRef(null);
+  const mapMovingProgrammatically = useRef(false);
 
-  // Playback marker (moving US)
   const [playbackPosition, setPlaybackPosition] = useState(null);
 
-  // Latest visited stop
+  // index for internal playback animation
+  const playbackIndexRef = useRef(0);
+
   const visitedStops = points.filter(p => p.status === "visited");
   const latestVisited = visitedStops[visitedStops.length - 1];
 
-    function getIconByType(p) {
+  function getIconByType(p) {
     if (p.type === "national_park") return getParkIcon(p.status);
     if (p.type === "snow_resort") return getSnowIcon(p.status);
     if (p.type === "camp") return getCampIcon(p.status);
@@ -63,49 +66,33 @@ export default function RouteMap({
     return getCampIcon(p.status);
   }
 
-  // ICON PICKER
+  // ICON LOGIC
   function getIcon(p) {
-    // If this is the latest visited stop
     if (latestVisited && p.id === latestVisited.id) {
 
-      // During playback → use the normal icon (no us.png)
-      if (playback.mode) {
-        return getIconByType(p); // fallback to type icon
-      }
+      if (playback.mode) return getIconByType(p);
 
-      // Normal mode → Highlight with US icon
       const icon = getUs();
       icon.options.zIndexOffset = 99999;
       return icon;
     }
-
-    if (p.type === "national_park") return getParkIcon(p.status);
-    if (p.type === "snow_resort") return getSnowIcon(p.status);
-    if (p.type === "camp") return getCampIcon(p.status);
-    if (p.type === "city") return getCityIcon(p.status);
-    if (p.type === "shop") return getShopIcon(p.status);
-    if (p.type === "monument") return getMonumentIcon(p.status);
-    return getCampIcon(p.status);
+    return getIconByType(p);
   }
 
-  // Convert lat/lng to screen point
+  // Menu position update
   const updateMenuPosition = useCallback(() => {
-    if (!selectedLatLng || !mapRef.current) {
-      console.log("bad LatLng Data: "+selectedLatLng+ " or "+!mapRef.current)
-      return;}
+    if (!selectedLatLng || !mapRef.current) return;
 
     const map = mapRef.current;
     const point = map.latLngToContainerPoint(selectedLatLng);
     setMenuPos({ x: point.x, y: point.y });
-  }, [selectedLatLng, mapRef]);
+  }, [selectedLatLng]);
 
-  // Update menu when map moves
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
     const moveHandler = () => updateMenuPosition();
-
     map.on("move", moveHandler);
     map.on("zoom", moveHandler);
 
@@ -115,104 +102,160 @@ export default function RouteMap({
     };
   }, [updateMenuPosition]);
 
-  // Initialize playback marker
-  
-/* eslint-disable react-hooks/exhaustive-deps */
-useEffect(() => {
+  // START / EXIT playback setup
+  useEffect(() => {
     if (playback?.mode) {
-      // Build full animation path
       const path = routes
         .filter(r => r.visited)
         .flatMap(r => r.coords);
 
       if (path.length > 0) {
+        playbackIndexRef.current = 0;
         setPlaybackPosition(path[0]);
-        setPlaybackTrail([path[0]]); // reset trail to starting point
+        setPlaybackTrail([path[0]]);
       }
     } else {
+      playbackIndexRef.current = 0;
       setPlaybackPosition(null);
-      setPlaybackTrail([]); // clear trail when playback exits
+      setPlaybackTrail([]);
+      setShownStops(new Set());
     }
   }, [playback?.mode]);
 
-  // PLAYBACK ANIMATION LOOP
-useEffect(() => {
-  if (!playback?.mode || !playback?.playing) return;
+  // Sync react index → ref
+  useEffect(() => {
+    if (typeof playback?.index === "number") {
+      playbackIndexRef.current = playback.index;
+    }
+  }, [playback?.index]);
 
-  setCameraFree(false);
+  // Distance check (Haversine)
+  function isNearStop(playbackPos, stop, thresholdMeters) {
+    if (!playbackPos) return false;
 
-  const animationPath = routes
-    .filter(r => r.visited)
-    .flatMap(r => r.coords);
+    const [lat1, lng1] = playbackPos;
+    const lat2 = stop.lat;
+    const lng2 = stop.lng;
 
-  if (!animationPath.length) return;
+    const R = 6371000;
+    const toRad = x => (x * Math.PI) / 180;
 
-  const interval = setInterval(() => {
-    setPlayback(prev => {
-      if (!prev.mode || !prev.playing) return prev;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
 
-      let nextIndex = prev.index + prev.direction * prev.speed;
-      const lastIndex = animationPath.length - 1;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.sin(dLng / 2) ** 2 *
+        Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2));
 
-      if (nextIndex < 0) nextIndex = 0;
-      if (nextIndex > lastIndex) return { ...prev, playing: false };
-
-      const nextPoint = animationPath[nextIndex];
-      setPlaybackPosition(nextPoint);
-      setPlaybackTrail(t => {
-        // prevent duplicates
-        if (t.length && t[t.length - 1][0] === nextPoint[0] && t[t.length - 1][1] === nextPoint[1]) {
-          return t;
-        }
-        return [...t, nextPoint];
-      });
-      if (mapRef.current && !cameraFree) {
-        mapMovingProgrammatically.current = true;
-
-        mapRef.current.setView(
-          nextPoint,
-          mapRef.current.getZoom(),
-          { animate: true }
-        );
-
-        setTimeout(() => {
-          mapMovingProgrammatically.current = false;
-        }, 80);
-      }
-
-      return { ...prev, index: nextIndex };
-    });
-  }, 60);
-
-  return () => clearInterval(interval);
-}, [
-  playback.mode,
-  playback.playing,
-  playback.speed,
-  playback.direction
-  // DO NOT add cameraFree or setPlayback
-  // DO NOT add routes
-]);
-// Update menu position when a marker is selected, retry if map isn't ready yet
-useEffect(() => {
-  if (!selectedLatLng) return;
-
-  // If map isn't ready on first click, retry shortly
-  if (!mapRef.current) {
-    console.log("map not ready, retrying updateMenuPosition...");
-    setTimeout(() => {
-      updateMenuPosition();
-    }, 50);
-    return;
+    return 2 * R * Math.asin(Math.sqrt(a)) < thresholdMeters;
   }
 
-  updateMenuPosition();
-}, [selectedLatLng]);
+  // Reveal stops as playback gets close (50 miles = 80467m)
+  useEffect(() => {
+    if (!playbackPosition) return;
 
+    setShownStops(prev => {
+      const updated = new Set(prev);
+
+      points.forEach(p => {
+        if (isNearStop(playbackPosition, p, 5000)) {
+          updated.add(p.id);
+        }
+      });
+
+      return updated;
+    });
+  }, [playbackPosition, points]);
+
+  // PLAYBACK LOOP
+  useEffect(() => {
+    if (!playback?.mode || !playback?.playing) return;
+
+    setCameraFree(false);
+
+    const sortedRoutes = routes
+      .slice()
+      .sort((a, b) => Number(a.key.split("-")[0]) - Number(b.key.split("-")[0]));
+
+    const animationPath = sortedRoutes
+      .filter(r => r.visited)
+      .flatMap(r => r.coords);
+
+    if (!animationPath.length) return;
+
+    const lastIndex = animationPath.length - 1;
+
+    const interval = setInterval(() => {
+      setPlayback(prev => {
+        if (!prev.mode || !prev.playing) return prev;
+
+        let nextIndex =
+          playbackIndexRef.current + prev.direction * prev.speed;
+
+        if (nextIndex < 0) nextIndex = 0;
+
+        if (nextIndex > lastIndex) {
+          const finalPoint = animationPath[lastIndex];
+  playbackIndexRef.current = lastIndex;
+  setPlaybackPosition(finalPoint);
+  setPlaybackTrail(t => [...t, finalPoint]);
+
+  return {
+    ...prev,
+    playing: false,
+    index: lastIndex
+  };
+        }
+
+        playbackIndexRef.current = nextIndex;
+        const nextPoint = animationPath[nextIndex];
+
+        setPlaybackPosition(nextPoint);
+
+        setPlaybackTrail(t => {
+          if (t.length && t[t.length - 1][0] === nextPoint[0] && t[t.length - 1][1] === nextPoint[1]) {
+            return t;
+          }
+          return [...t, nextPoint];
+        });
+
+        if (mapRef.current && !cameraFree) {
+          mapMovingProgrammatically.current = true;
+          mapRef.current.setView(
+            nextPoint,
+            mapRef.current.getZoom(),
+            { animate: true }
+          );
+          setTimeout(() => {
+            mapMovingProgrammatically.current = false;
+          }, 80);
+        }
+        return {
+          ...prev,
+          index: nextIndex
+        };
+
+      });
+    }, 60);
+
+    return () => clearInterval(interval);
+  }, [playback.mode, playback.playing, playback.speed, playback.direction]);
+
+  // Update menu on selection
+  useEffect(() => {
+    if (!selectedLatLng) return;
+
+    if (!mapRef.current) {
+      setTimeout(updateMenuPosition, 50);
+      return;
+    }
+    updateMenuPosition();
+  }, [selectedLatLng, updateMenuPosition]);
 
   // Marker click
   function handleMarkerClick(index, stop) {
-    
     setSelectedIndex(index);
     setSelectedLatLng([stop.lat, stop.lng]);
     setAddMenu(null);
@@ -225,8 +268,7 @@ useEffect(() => {
   return (
     <div style={{ height: "100vh", width: "100vw", position: "relative" }}>
       <MapContainer
-      ref={mapRef}
-
+        ref={mapRef}
         center={initialCenter}
         zoom={4}
         zoomControl={false}
@@ -234,53 +276,60 @@ useEffect(() => {
       >
         <TileLayer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png" />
 
-        {/* PANE DEFINITIONS MUST COME FIRST */}
-        <Pane name="playbackPane" style={{ zIndex: 20000 }} />
-        <Pane name="trailPane" style={{ zIndex: 700 }} />  
+        {/* PANES */}
+        <Pane name="playbackPane" style={{ zIndex: 9999999 }} />
+        <Pane name="trailPane" style={{ zIndex: 700 }} />
         <Pane name="visitedPane" style={{ zIndex: 600 }} />
         <Pane name="unvisitedPane" style={{ zIndex: 500 }} />
-                {/* GREEN TRAIL */}
-          {playbackTrail.length > 1 && (
+
+        {/* GREEN TRAIL */}
+        {playbackTrail.length > 1 && (
           <Polyline
             positions={playbackTrail}
             color="lime"
             weight={2}
             pane="trailPane"
           />
-        )}    
-        {routes.map(route => (
-          
-          <Polyline
-            key={route.key}
-            positions={route.coords}
-            color={route.visited ? "dodgerblue" : "gray"}
-            weight={4}
-            pane={route.visited ? "visitedPane" : "unvisitedPane"}
-            
-          />
-        ))}
+        )}
 
+        {/* ROUTES HIDDEN DURING PLAYBACK */}
+        {routes.map(route => {
+          if (playback?.mode) return null;
+
+          return (
+            <Polyline
+              key={route.key}
+              positions={route.coords}
+              color={route.visited ? "dodgerblue" : "gray"}
+              weight={4}
+              pane={route.visited ? "visitedPane" : "unvisitedPane"}
+            />
+          );
+        })}
 
         {/* STATIC MARKERS */}
         {points.map((p, index) => {
+          if (playback?.mode) {
+            const near = isNearStop(playbackPosition, p, 2000);
+            if (!shownStops.has(p.id) && !near) return null;
+          }
+
           const isLatest =
             latestVisited &&
             p.lat === latestVisited.lat &&
             p.lng === latestVisited.lng;
-            
 
-            return (
-              <Marker
-                key={p.id ?? index}
-                position={[p.lat, p.lng]}
-                zIndexOffset={isLatest ? 999999 : 0}
-                icon={getIcon(p)}
-                eventHandlers={{
-                  click: () => handleMarkerClick(index, p)
-                }}
-              />
-            );
-
+          return (
+            <Marker
+              key={p.id ?? index}
+              position={[p.lat, p.lng]}
+              zIndexOffset={isLatest ? 999999 : 0}
+              icon={getIcon(p)}
+              eventHandlers={{
+                click: () => handleMarkerClick(index, p)
+              }}
+            />
+          );
         })}
 
         {/* PLAYBACK MARKER */}
@@ -288,7 +337,8 @@ useEffect(() => {
           <Marker
             position={playbackPosition}
             icon={getUs()}
-            pane="playbackPane" 
+            pane = "playbackPane"
+            zIndexOffset={999999}
           />
         )}
       </MapContainer>
@@ -302,8 +352,7 @@ useEffect(() => {
             top: menuPos.y - 20,
             transform: "translate(-50%, -100%)",
             zIndex: 99990,
-            pointerEvents: "auto",
-            
+            pointerEvents: "auto"
           }}
         >
           <LocationMenu
@@ -312,7 +361,7 @@ useEffect(() => {
             loggedIn={loggedIn}
             onChange={onChange}
             onDelete={onDelete}
-            onAddStopClick={(idx )=>
+            onAddStopClick={idx =>
               setAddMenu({ index: idx, position: menuPos })
             }
             onClose={() => {

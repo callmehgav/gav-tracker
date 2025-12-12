@@ -39,3 +39,10 @@
   }
 }
 
+.leaflet-marker-pane {
+  z-index: 20000 !important;
+}
+
+.leaflet-overlay-pane {
+  z-index: 10000 !important;
+}
