@@ -1,4 +1,4 @@
-# Stage 1 â€” Build React
+# Stage 1 — Build React
 FROM node:18-alpine AS build-frontend
 WORKDIR /app
 COPY frontend/web/package*.json ./
@@ -6,12 +6,12 @@ RUN npm install
 COPY frontend/web ./
 RUN npm run build
 
-# Stage 2 â€” PHP FPM backend
+# Stage 2 — PHP FPM backend
 FROM php:8.2-fpm-alpine AS backend
 WORKDIR /app
 COPY backend /app/backend
 
-# Stage 3 â€” Final NGINX + PHP-FPM production server
+# Stage 3 — Final NGINX + PHP-FPM production server
 FROM nginx:1.27-alpine
 
 # Copy React build into NGINX root
