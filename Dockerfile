@@ -1,30 +1,44 @@
-# Stage 1 — Build React
+# -----------------------------------------------------
+# Stage 1: Build React frontend
+# -----------------------------------------------------
 FROM node:18-alpine AS build-frontend
+
+# Create working directory
 WORKDIR /app
-COPY frontend/web/package*.json ./
+
+# Copy package files first (better caching)
+COPY frontend/web/package*.json ./frontend/
+
+WORKDIR /app/frontend
 RUN npm install
-COPY frontend/web ./
+
+# Copy the rest of the frontend
+COPY frontend/web ./frontend
+
+# Build production React bundle
 RUN npm run build
 
-# Stage 2 — PHP FPM backend
-FROM php:8.2-fpm-alpine AS backend
+
+# -----------------------------------------------------
+# Stage 2: PHP backend + serve React
+# -----------------------------------------------------
+FROM php:8.2-alpine
+
+# Install PHP extensions you need
+RUN docker-php-ext-install pdo pdo_mysql
+
+# Working directory for backend
 WORKDIR /app
+
+# Copy backend PHP code
 COPY backend /app/backend
 
-# Stage 3 — Final NGINX + PHP-FPM production server
-FROM nginx:1.27-alpine
+# Copy React build output into backend public folder
+COPY --from=build-frontend /app/frontend/build /app/backend/public/frontend
 
-# Copy React build into NGINX root
-COPY --from=build-frontend /app/build /var/www/html
-
-# Copy backend (PHP) into container
-COPY --from=backend /app/backend /var/www/backend
-
-# Copy nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Expose Railway port
+# Expose the port Railway injects
 EXPOSE 8080
 
-# Start Nginx in foreground
-CMD ["nginx", "-g", "daemon off;"]
+# Use PHPâ€™s built-in web server
+# Serve backend/public as the root
+CMD php -S 0.0.0.0:${PORT} -t /app/backend/public
