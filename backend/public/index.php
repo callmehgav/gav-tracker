@@ -1,6 +1,6 @@
 <?php
 
-$buildPath = __DIR__ . '/../../frontend/web/build';
+$buildPath = __DIR__;
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $filePath = realpath($buildPath . $requestUri);
 
