@@ -1,6 +1,7 @@
 # 1. Build React frontend
 FROM node:18-alpine AS frontend
 
+
 WORKDIR /app/frontend
 COPY frontend/web/package.json frontend/web/package-lock.json ./
 RUN npm install
