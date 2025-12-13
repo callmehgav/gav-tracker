@@ -3,42 +3,38 @@
 # -----------------------------------------------------
 FROM node:18-alpine AS build-frontend
 
-# Create working directory
-WORKDIR /app
-
-# Copy package files first (better caching)
-COPY frontend/web/package*.json ./frontend/
-
 WORKDIR /app/frontend
+
+# Copy dependency files
+COPY frontend/web/package*.json ./
+
 RUN npm install
 
-# Copy the rest of the frontend
-COPY frontend/web ./frontend
+# Copy the rest of the React project
+COPY frontend/web/ ./
 
-# Build production React bundle
+# Build optimized production assets
 RUN npm run build
 
 
 # -----------------------------------------------------
-# Stage 2: PHP backend + serve React
+# Stage 2: PHP backend + serve built React
 # -----------------------------------------------------
 FROM php:8.2-alpine
 
-# Install PHP extensions you need
-RUN docker-php-ext-install pdo pdo_mysql
-
-# Working directory for backend
 WORKDIR /app
 
-# Copy backend PHP code
+# Install PHP extensions (if needed)
+RUN docker-php-ext-install pdo pdo_mysql
+
+# Copy backend
 COPY backend /app/backend
 
-# Copy React build output into backend public folder
-COPY --from=build-frontend /app/frontend/build /app/backend/public/frontend
+# Copy built React output FROM stage 1
+COPY --from=build-frontend /app/frontend/build /app/backend/public
 
-# Expose the port Railway injects
+# Expose port (Railway injects PORT)
 EXPOSE 8080
 
-# Use PHP’s built-in web server
-# Serve backend/public as the root
-CMD php -S 0.0.0.0:${PORT} -t /app/backend/public
+# Start PHP development server
+CMD php -S 0.0.0.0:${PORT:-8080} -t /app/backend/public
