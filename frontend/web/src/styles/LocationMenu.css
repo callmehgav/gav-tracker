@@ -115,67 +115,46 @@
 /* ------------------------------------------- */
 /* MOBILE — Smaller Location Menu UI           */
 /* ------------------------------------------- */
+/* MOBILE SIZE TUNING */
 @media (max-width: 600px) {
-
-  /* Card itself */
   .location-menu-card {
-    width: 88%;
-    padding: 12px !important;
-
-    border-radius: 10px;
-    font-size: 14px;
+    transform: scale(0.82);          /* shrink entire menu */
+    transform-origin: top left;
+    max-width: 260px;                /* narrower */
+    padding: 10px !important;        /* tighter padding */
   }
 
-  /* Header row */
   .location-menu-header {
-    padding: 4px 2px;
+    padding: 4px 6px !important;
   }
 
-  /* Close button */
+  .location-menu-card label {
+    font-size: 13px !important;
+  }
+
+  .location-menu-card input,
+  .location-menu-card textarea,
+  .location-menu-card select {
+    font-size: 13px !important;
+    padding: 6px 8px !important;
+  }
+
   .location-menu-close {
-    font-size: 18px;
-    padding: 4px 8px;
+    font-size: 18px !important;
+    padding: 2px 6px !important;
   }
 
-  /* Field groups */
-  .field-group {
-    gap: 2px;
-    margin-bottom: 8px;
-  }
-
-  .field-group label {
-    font-size: 13px;
-  }
-
-  /* Inputs and selects */
-  .field-group input,
-  .field-group select,
-  .field-group textarea {
-    font-size: 14px;
-    padding: 6px 8px;
-
-    border-radius: 6px;
-  }
-
-  .field-group textarea {
-    min-height: 60px;
-  }
-
-  /* Notes display (read only) */
-  .notes-display {
-    font-size: 14px;
-    padding: 8px;
-  }
-
-  /* Action buttons block */
   .location-menu-actions {
-    gap: 8px;
+    gap: 6px !important;
   }
 
   .add-btn,
   .delete-btn {
-    font-size: 14px;
-    padding: 6px 8px;
-    border-radius: 8px;
+    padding: 6px 8px !important;
+    font-size: 13px !important;
+  }
+
+  .notes-display {
+    font-size: 13px !important;
   }
 }
