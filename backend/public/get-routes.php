@@ -1,8 +1,9 @@
 <?php
+ini_set('memory_limit', '512M');
+
 require_once __DIR__ . '/cors.php';
 require_once __DIR__ . '/env.php';
 require_once __DIR__ . '/auth.php';
-ini_set('memory_limit', '512M');
 
 // Logging helper
 function logRoute($msg) {
