@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "../styles/StatBar.css";
 import logo from "../assets/logos/logoNoWords.png";
-import { Play, Pause, Rewind, FastForward, Square, AlignVerticalJustifyEnd } from "lucide-react";
+import { Play, Pause, Rewind, FastForward, Square } from "lucide-react";
 
 export default function StatsBar({
   totalMiles,

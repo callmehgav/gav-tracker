@@ -274,7 +274,9 @@ export default function RouteMap({
         zoomControl={false}
         style={{ height: "100%", width: "100%" }}
       >
-        <TileLayer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png" />
+        <TileLayer 
+  url={`https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}.png?api_key=${process.env.REACT_APP_STADIA_API_KEY}`}
+          />
 
         {/* PANES */}
         <Pane name="playbackPane" style={{ zIndex: 9999999 }} />
