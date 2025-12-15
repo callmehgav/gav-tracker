@@ -68,13 +68,13 @@
   display: block;
 }
 .statsbar-arrow {
-  font-size: 22px;           /* slightly reduced to match the ✓ button height */
-  line-height: 1;            /* <<< fixes vertical offset */
   display: flex;
-  align-items: center;       /* <<< perfect vertical centering */
+  align-items: center;
   justify-content: center;
-  height: 32px;              /* matches your button height visually */
+  width: 32px;
+  height: 32px;
 }
+
 
 
 /* RIGHT SIDE — Save / Discard buttons */

@@ -2,7 +2,7 @@ import { useState,useRef, useEffect } from "react";
 import "../styles/StatBar.css";
 import logo from "../assets/logos/logoNoWords.png";
 import { Play, Pause, Rewind, FastForward, Square } from "lucide-react";
-import { X } from "lucide-react";
+import { X, Menu } from "lucide-react";
 
 export default function StatsBar({
   totalMiles,
@@ -137,13 +137,13 @@ return (
             >
               <img src={logo} alt="Logo" className="statsbar-logo" />
             </a>
+        <div
+          className={`statsbar-arrow ${expanded ? "arrow-left" : "arrow-right"}`}
+        >
+          {expanded ? <X size={22} color="#fff" /> : <Menu size={22} color="#fff" />}
+        </div>
 
-            <div className={`statsbar-arrow ${expanded ? "arrow-left" : "arrow-right"}`}>
-            {expanded ? <X size={22} color="#fff" /> : "☰"}            </div>
-          </div>
-
-        
-
+        </div>
           {/* RIGHT SIDE — Save / Discard */}
           {loggedIn && (
             <div className="statsbar-right-buttons">
