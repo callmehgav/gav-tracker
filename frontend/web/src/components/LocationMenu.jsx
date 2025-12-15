@@ -1,5 +1,5 @@
 import "../styles/LocationMenu.css";
-
+import { useEffect, useRef } from "react";
 export default function LocationMenu({
   stop,
   index,
@@ -9,6 +9,25 @@ export default function LocationMenu({
   onAddStopClick,
   onClose
 }) {
+
+  // ---------------------------
+  // CLICK OUTSIDE TO CLOSE
+  // ---------------------------
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        onClose();
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onClose]);
+  // ---------------------------
+
+  // Hooks must appear before this check
   if (!stop) return null;
 
   const handleFieldChange = (field, value) => {
@@ -23,7 +42,7 @@ export default function LocationMenu({
   //const coordsText = `${Number(stop.lat).toFixed(4)}, ${Number(stop.lng).toFixed(4)}`;
 
   return (
-    <div className="location-menu-card">
+    <div className="location-menu-card"ref={menuRef}>
 
       {/* HEADER */}
       <div className="location-menu-header">

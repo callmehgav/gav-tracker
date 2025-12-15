@@ -46,3 +46,15 @@
 .leaflet-overlay-pane {
   z-index: 10000 !important;
 }
+/* Mobile refinement */
+@media (max-width: 600px) {
+  .us-pulse::after {
+    width: 36px;
+    height: 36px;
+    background: rgba(0, 255, 0, 0.22); /* a bit tighter glow */
+  }
+
+  .us-pulse img {
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, .8));
+  }
+}
