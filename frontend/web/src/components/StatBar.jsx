@@ -2,6 +2,7 @@ import { useState,useRef, useEffect } from "react";
 import "../styles/StatBar.css";
 import logo from "../assets/logos/logoNoWords.png";
 import { Play, Pause, Rewind, FastForward, Square } from "lucide-react";
+import { X } from "lucide-react";
 
 export default function StatsBar({
   totalMiles,
@@ -138,8 +139,7 @@ return (
             </a>
 
             <div className={`statsbar-arrow ${expanded ? "arrow-left" : "arrow-right"}`}>
-                 {expanded ? "✖" : "☰"}
-            </div>
+            {expanded ? <X size={22} color="#fff" /> : "☰"}            </div>
           </div>
 
         
