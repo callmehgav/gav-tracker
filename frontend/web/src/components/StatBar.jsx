@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useRef, useEffect } from "react";
 import "../styles/StatBar.css";
 import logo from "../assets/logos/logoNoWords.png";
 import { Play, Pause, Rewind, FastForward, Square } from "lucide-react";
@@ -40,6 +40,18 @@ const API =
   const [password, setPassword] = useState("");
   const [editMaint, setEditMaint] = useState(maintananceCost??"");
 
+const barRef = useRef(null);
+
+useEffect(() => {
+  function handleOutside(e) {
+    if (barRef.current && !barRef.current.contains(e.target)) {
+      if (expanded) setExpanded(false); // collapse
+    }
+  }
+
+  document.addEventListener("mousedown", handleOutside);
+  return () => document.removeEventListener("mousedown", handleOutside);
+}, [expanded]);
 
 
   // LOGIN HANDLER
@@ -79,7 +91,7 @@ const API =
   };
 return (
   <>
-    <div className="statsbar-wrapper">
+    <div className="statsbar-wrapper"ref={barRef}>
 
       {/* IF PLAYBACK MODE, REPLACE UI ENTIRELY */}
       {playback.mode ? (
