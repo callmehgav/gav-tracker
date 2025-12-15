@@ -118,10 +118,13 @@
 /* MOBILE SIZE TUNING */
 @media (max-width: 600px) {
   .location-menu-card {
-    transform: scale(0.82);          /* shrink entire menu */
-    transform-origin: top left;
+    transform: scale(0.7);          /* shrink entire menu */
+    transform-origin: top center;
     max-width: 260px;                /* narrower */
     padding: 10px !important;        /* tighter padding */
+    
+    position: relative;
+    top: 120px;     
   }
 
   .location-menu-header {
