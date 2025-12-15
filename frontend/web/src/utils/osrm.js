@@ -1,7 +1,12 @@
 import polyline from "@mapbox/polyline";
 
 export async function getOSRMRoute(start, end) {
-  const url = `http://localhost:8000/osrm-route.php?start=${start}&end=${end}`;
+const API =
+  process.env.REACT_APP_API_BASE ||
+  (process.env.NODE_ENV === "development"
+    ? "http://localhost:8000"
+    : "https://tracker.gavs-nexus.com");
+  const url = `${API}/osrm-route.php?start=${start}&end=${end}`;
     //console.log("Requesting OSRM:", url);
 
   try {

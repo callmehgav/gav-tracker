@@ -6,7 +6,11 @@ import LoadingScreen from "./components/LoadingScreen";
 import { computeStats } from "./utils/stats";
 
 function App() {
-  const API = process.env.REACT_APP_API_BASE; // if using env
+const API =
+  process.env.REACT_APP_API_BASE ||
+  (process.env.NODE_ENV === "development"
+    ? "http://localhost:8000"
+    : "https://tracker.gavs-nexus.com");
   // const API = "http://localhost:8000"; // uncomment if not using env file
 
   const [trip, setTrip] = useState(null);

@@ -27,7 +27,11 @@ export default function StatsBar({
   fastForward
          
 }) {
-  const API = process.env.REACT_APP_API_BASE;
+const API =
+  process.env.REACT_APP_API_BASE ||
+  (process.env.NODE_ENV === "development"
+    ? "http://localhost:8000"
+    : "https://tracker.gavs-nexus.com");
 
   const [loggedIn, setLoggedIn] = useState(false);
   const [expanded, setExpanded] = useState(false);
