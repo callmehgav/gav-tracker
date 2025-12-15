@@ -1,5 +1,4 @@
 <?php
-
 require_once __DIR__ . '/env.php';
 require_once __DIR__ . '/cors.php';
 $data = json_decode(file_get_contents("php://input"), true);
