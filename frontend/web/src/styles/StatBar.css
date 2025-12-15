@@ -284,17 +284,6 @@
   transform: translateY(-1px);
 }
 
-
-/* MOBILE */
-@media (max-width: 600px) {
-  .stat-row {
-    width: 100%;
-  }
-
-  .statsbar-logo {
-    height: 32px;
-  }
-}
 .playback-controls {
   display: flex;
   align-items: center;
@@ -341,4 +330,91 @@
   color: #fff;
   padding: 4px 8px;
   opacity: 0.8;
+}
+
+
+
+/* ------------------------------------------- */
+/* MOBILE UI REDUCTION — StatsBar + Playback  */
+/* ------------------------------------------- */
+@media (max-width: 600px) {
+
+  /* STATS BAR PANEL */
+  .statsbar-content {
+    padding: 10px 12px;
+    gap: 10px;
+
+    border-radius: 10px;
+    font-size: 13px;
+  }
+
+  .statsbar-logo {
+    height: 26px;
+  }
+
+  .statsbar-arrow {
+    font-size: 16px;
+    height: 24px;
+  }
+
+  .stat-row {
+    font-size: 13px;
+    line-height: 1.25;
+  }
+
+  .stats-group {
+    gap: 2px;
+    padding: 2px 0 6px 0;
+  }
+
+  .save-btn,
+  .discard-btn {
+    padding: 2px 6px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+
+  .auth-section button {
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+
+  /* LOGIN MODAL */
+  .login-modal {
+    width: 240px;
+    padding: 16px 14px;
+    gap: 10px;
+  }
+
+  .login-modal input {
+    font-size: 13px;
+    padding: 7px 10px;
+  }
+
+  .login-buttons button {
+    font-size: 13px;
+    padding: 6px 0;
+  }
+
+  /* PLAYBACK CONTROLS */
+  .playback-controls {
+    gap: 8px;
+    padding: 6px 10px;
+
+    border-radius: 10px;
+    transform: scale(0.82);
+    transform-origin: bottom left;
+  }
+
+  .pb-btn {
+    padding: 4px 8px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+
+  .pb-speed-indicator {
+    font-size: 13px;
+    padding: 2px 4px;
+  }
 }
