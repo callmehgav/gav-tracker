@@ -330,6 +330,7 @@ export default function RouteMap({
                 p.status === "visited" ? 1000 :
                 0
               }
+              
               icon={getIcon(p)}
               eventHandlers={{
                 click: () => handleMarkerClick(index, p)

@@ -3,6 +3,7 @@ import "../styles/StatBar.css";
 import logo from "../assets/logos/logoNoWords.png";
 import { Play, Pause, Rewind, FastForward, Square } from "lucide-react";
 import { X, Menu } from "lucide-react";
+import youtubeIcon from "../assets/icons/youtube.svg";
 
 export default function StatsBar({
   totalMiles,
@@ -137,6 +138,24 @@ return (
             >
               <img src={logo} alt="Logo" className="statsbar-logo" />
             </a>
+            {/* CENTER — YouTube CTA 
+              <a
+                href="https://www.youtube.com/@callmehgav"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="statsbar-youtube"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <img
+                  src={youtubeIcon}
+                  alt="YouTube"
+                  className="statsbar-youtube-icon"
+                />
+
+                <div className="statsbar-youtube-hover">
+                  <span>Watch my adventures unfold!</span>
+                </div>
+              </a>*/}
         <div
           className={`statsbar-arrow ${expanded ? "arrow-left" : "arrow-right"}`}
         >
@@ -144,6 +163,8 @@ return (
         </div>
 
         </div>
+        
+
           {/* RIGHT SIDE — Save / Discard */}
           {loggedIn && (
             <div className="statsbar-right-buttons">
@@ -182,6 +203,7 @@ return (
               </button>
             </div>
           )}
+
 
 
         </div>
