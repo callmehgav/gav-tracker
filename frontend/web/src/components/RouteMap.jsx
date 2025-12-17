@@ -278,7 +278,7 @@ export default function RouteMap({
         url={`https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png?api_key=${process.env.REACT_APP_STADIA_API_KEY}`}
       />
 
-        {/* PANES */}
+        {/* PANES for poly lines*/}
         <Pane name="playbackPane" style={{ zIndex: 9999999 }} />
         <Pane name="trailPane" style={{ zIndex: 700 }} />
         <Pane name="visitedPane" style={{ zIndex: 600 }} />
@@ -325,7 +325,11 @@ export default function RouteMap({
             <Marker
               key={p.id ?? index}
               position={[p.lat, p.lng]}
-              zIndexOffset={isLatest ? 999999 : 0}
+              zIndexOffset={
+                isLatest ? 999999 :
+                p.status === "visited" ? 1000 :
+                0
+              }
               icon={getIcon(p)}
               eventHandlers={{
                 click: () => handleMarkerClick(index, p)
