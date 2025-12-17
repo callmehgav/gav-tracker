@@ -354,10 +354,15 @@
 
 
 .statsbar-youtube {
-  position: relative;
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  z-index: 1100;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   padding: 6px;
   border-radius: 8px;
 }

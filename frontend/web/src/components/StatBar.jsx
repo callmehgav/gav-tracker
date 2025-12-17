@@ -138,7 +138,7 @@ return (
             >
               <img src={logo} alt="Logo" className="statsbar-logo" />
             </a>
-            {/* CENTER — YouTube CTA 
+            {/* CENTER — YouTube CTA */}
               <a
                 href="https://www.youtube.com/@callmehgav"
                 target="_blank"
@@ -155,7 +155,7 @@ return (
                 <div className="statsbar-youtube-hover">
                   <span>Watch my adventures unfold!</span>
                 </div>
-              </a>*/}
+              </a>
         <div
           className={`statsbar-arrow ${expanded ? "arrow-left" : "arrow-right"}`}
         >
