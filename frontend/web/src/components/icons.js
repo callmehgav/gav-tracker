@@ -1,6 +1,6 @@
 import L from "leaflet";
 //us!
-import us from "../assets/icons/us.png";
+import us from "../assets/icons/yodaUs.png";
 import "../styles/map-icons.css";
 // National park icons
 import parkDefault from "../assets/icons/national-park-white.png";

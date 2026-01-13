@@ -3,11 +3,18 @@ export function computeStats(routes, points) {
   const milesDone = routes.filter(r => r.visited).reduce((sum, r) => sum + r.distance, 0);
   const milesLeft = totalMiles - milesDone;
 
-  const MPG = 10;
-  const DIESEL = 4.25;
+  const fMPG = 10;
+  const DIESEL = 4.5;
 
-  const dieselCostTotal = ((totalMiles / MPG) * DIESEL).toFixed(2);
-  const dieselCostSpent = ((milesDone / MPG) * DIESEL).toFixed(2);
+  const dieselCostTotal = ((totalMiles / fMPG) * DIESEL).toFixed(2);
+  const dieselCostSpent = ((milesDone / fMPG) * DIESEL).toFixed(2);
+
+
+  const tMPG = 14;
+  const GAS = 4;
+
+  const gasCostTotal = ((totalMiles / tMPG) * GAS).toFixed(2);
+  const gasCostSpent = ((milesDone / tMPG) * GAS).toFixed(2);
 
 
   const parksVisited = points.filter(
@@ -18,7 +25,7 @@ export function computeStats(routes, points) {
     p => p.type === "snow_resort" && p.status === "visited"
   ).length;
 
-  const startDate = new Date("2025-12-15");
+  const startDate = new Date("2026-01-10");
   const today = new Date();
 
   const daysSinceStart = Math.floor(
@@ -31,6 +38,8 @@ export function computeStats(routes, points) {
     milesLeft,
     dieselCostTotal,
     dieselCostSpent,
+    gasCostTotal,
+    gasCostSpent,
     parksVisited,
     snowVisited,
     daysSinceStart

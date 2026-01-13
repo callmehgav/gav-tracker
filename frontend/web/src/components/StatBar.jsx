@@ -11,6 +11,8 @@ export default function StatsBar({
   milesLeft,
   dieselCostTotal,
   dieselCostSpent,
+  gasCostTotal,
+  gasCostSpent,
   maintananceCost,
   parksVisited,
   snowVisited,
@@ -221,8 +223,10 @@ return (
 
             {/* GROUP 2 */}
             <div className="stats-group">
-              <div className="stat-row"><strong>Diesel Expected:</strong> ${dieselCostTotal}</div>
-              <div className="stat-row"><strong>Diesel Spent:</strong> ${dieselCostSpent}</div>
+              {/*<div className="stat-row"><strong>Diesel Expected:</strong> ${dieselCostTotal}</div>
+              <div className="stat-row"><strong>Diesel Spent:</strong> ${dieselCostSpent}</div>*/}
+              <div className="stat-row"><strong>Gas Expected:</strong> ${gasCostTotal}</div>
+              <div className="stat-row"><strong>Gas Spent:</strong> ${gasCostSpent}</div>
               <div className="stat-row">
                 <strong>Maintanance:</strong>
 
