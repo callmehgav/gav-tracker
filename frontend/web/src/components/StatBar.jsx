@@ -253,7 +253,7 @@ return (
             <div className="stats-group">
               <div className="stat-row"><strong>Parks Hit:</strong> {parksVisited}</div>
               <div className="stat-row"><strong>Snow Resorts:</strong> {snowVisited}</div>
-              <div className="stat-row"><strong>Days Since Start:</strong> {daysSinceStart}</div>
+              <div className="stat-row"><strong>Total Days:</strong> 142</div>
             </div>
 
             {/* AUTH BUTTON */}
